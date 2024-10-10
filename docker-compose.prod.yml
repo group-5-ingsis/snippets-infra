@@ -1,0 +1,67 @@
+services:
+  # Service for Parse Project
+  parse-app:
+    platform: linux/amd64
+    image: ghcr.io/mpiccinini/parse:latest
+    ports:
+      - ${PARSE_APP_PORT}  # Host to Container port mapping
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      SERVER_PORT: ${PARSE_SERVER_PORT}  # Internal container port for Spring Boot
+
+  # Service for Snippets Project
+  snippets-app:
+    platform: linux/amd64
+    image: ghcr.io/mpiccinini/snippets:latest
+    ports:
+      - ${SNIPPETS_APP_PORT}
+    environment:
+      SPRING_DATASOURCE_URL: ${SNIPPETS_DB_URL}
+      SPRING_DATASOURCE_USERNAME: ${SNIPPETS_DB_USER}
+      SPRING_DATASOURCE_PASSWORD: ${SNIPPETS_DB_PASSWORD}
+      SERVER_PORT: ${SNIPPETS_SERVER_PORT}
+    depends_on:
+      - db-snippets
+      - permission-app
+
+  # Service for Permission Project
+  permission-app:
+    platform: linux/amd64
+    image: ghcr.io/mpiccinini/permission:latest
+    ports:
+      - ${PERMISSION_APP_PORT}
+    environment:
+      SPRING_DATASOURCE_URL: ${PERMISSION_DB_URL}
+      SPRING_DATASOURCE_USERNAME: ${PERMISSION_DB_USER}
+      SPRING_DATASOURCE_PASSWORD: ${PERMISSION_DB_PASSWORD}
+      SERVER_PORT: ${PERMISSION_SERVER_PORT}
+    depends_on:
+      - db-permission
+
+  # PostgreSQL for Snippets Project
+  db-snippets:
+    image: postgres:13
+    environment:
+      POSTGRES_USER: ${SNIPPETS_DB_USER}
+      POSTGRES_PASSWORD: ${SNIPPETS_DB_PASSWORD}
+      POSTGRES_DB: ${SNIPPETS_DB_NAME}
+    ports:
+      - ${SNIPPETS_DB_PORT}
+    volumes:
+      - db-snippets-data:/var/lib/postgresql/data
+
+  # PostgreSQL for Permission Project
+  db-permission:
+    image: postgres:13
+    environment:
+      POSTGRES_USER: ${PERMISSION_DB_USER}
+      POSTGRES_PASSWORD: ${PERMISSION_DB_PASSWORD}
+      POSTGRES_DB: ${PERMISSION_DB_NAME}
+    ports:
+      - ${PERMISSION_DB_PORT}
+    volumes:
+      - db-permission-data:/var/lib/postgresql/data
+
+volumes:
+  db-snippets-data:
+  db-permission-data:
