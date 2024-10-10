@@ -1,0 +1,23 @@
+name: Continuos Deploy
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Deploy to Dev
+        if: github.event.ref == 'refs/heads/main'
+        run: |
+          ssh user@dev-vm-ip-address 'cd /path/to/infra-repo && git pull && docker compose -f docker-compose.dev.yml up -d --build'
+
+      - name: Deploy to Prod
+        if: github.event.ref == 'refs/heads/main'
+        run: |
+          ssh user@prod-vm-ip-address 'cd /path/to/infra-repo && git pull && docker compose -f docker-compose.prod.yml up -d --build'
