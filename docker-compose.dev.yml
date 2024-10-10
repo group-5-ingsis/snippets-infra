@@ -1,7 +1,7 @@
 services:
   parse-app:
     platform: linux/amd64
-    image: ghcr.io/mpiccinini/parse:latest
+    image: ghcr.io/mpiccinini/parse:latest-dev
     ports:
       - ${PARSE_APP_PORT}
     environment:
@@ -10,7 +10,7 @@ services:
 
   snippets-app:
     platform: linux/amd64
-    image: ghcr.io/mpiccinini/snippets:latest
+    image: ghcr.io/mpiccinini/snippets:latest-dev
     ports:
       - ${SNIPPETS_APP_PORT}
     environment:
@@ -24,7 +24,7 @@ services:
 
   permission-app:
     platform: linux/amd64
-    image: ghcr.io/mpiccinini/permission:latest
+    image: ghcr.io/mpiccinini/permission:latest-dev
     ports:
       - ${PERMISSION_APP_PORT}
     environment:
