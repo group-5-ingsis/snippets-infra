@@ -1,6 +1,6 @@
 services:
   parse-app:
-    image: ghcr.io/mpiccinini/parse:latest
+    image: ghcr.io/group-5-ingsis/parse:latest
     ports:
       - ${PARSE_APP_PORT}
     environment:
@@ -8,7 +8,7 @@ services:
       SERVER_PORT: ${PARSE_SERVER_PORT}
 
   snippets-app:
-    image: ghcr.io/mpiccinini/snippets:latest
+    image: ghcr.io/group-5-ingsis/snippets:latest
     ports:
       - ${SNIPPETS_APP_PORT}
     environment:
@@ -21,7 +21,7 @@ services:
       - permission-app
 
   permission-app:
-    image: ghcr.io/mpiccinini/permission:latest
+    image: ghcr.io/group-5-ingsis/permission:latest
     ports:
       - ${PERMISSION_APP_PORT}
     environment:
