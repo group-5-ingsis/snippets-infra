@@ -1,13 +1,32 @@
 services:
-  parse-app:
+
+  nginx:
+    image: jwilder/nginx-proxy
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - /var/run/docker.sock:/tmp/docker.sock:ro
+    networks:
+      - snippet-searcher
+
+  lets-encrypt:
+    image: jrcs/letsencrypt-nginx-proxy-companion
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks:
+      - snippet-searcher
+
+  parse:
     image: ghcr.io/group-5-ingsis/parse:latest-dev
     ports:
       - ${PARSE_APP_PORT}
     environment:
-      SPRING_PROFILES_ACTIVE: docker
       SERVER_PORT: ${PARSE_SERVER_PORT}
+    networks:
+      - snippet-searcher
 
-  snippets-app:
+  snippets:
     image: ghcr.io/group-5-ingsis/snippets:latest-dev
     ports:
       - ${SNIPPETS_APP_PORT}
@@ -22,9 +41,21 @@ services:
       AUTH_CLIENT_SECRET: ${SNIPPETS_AUTH_CLIENT_SECRET}
     depends_on:
       - db-snippets
-      - permission-app
+    networks:
+      - snippet-searcher
 
-  permission-app:
+  db-snippets:
+    image: postgres:13
+    environment:
+      POSTGRES_USER: ${SNIPPETS_DB_USER}
+      POSTGRES_PASSWORD: ${SNIPPETS_DB_PASSWORD}
+      POSTGRES_DB: ${SNIPPETS_DB_NAME}
+    ports:
+      - ${SNIPPETS_DB_PORT}
+    volumes:
+      - db-snippets-data:/var/lib/postgresql/data
+
+  permission:
     image: ghcr.io/group-5-ingsis/permission:latest-dev
     ports:
       - ${PERMISSION_APP_PORT}
@@ -40,17 +71,8 @@ services:
       AUTH_CALLBACK: ${PERMISSION_AUTH_CALLBACK}
     depends_on:
       - db-permission
-
-  db-snippets:
-    image: postgres:13
-    environment:
-      POSTGRES_USER: ${SNIPPETS_DB_USER}
-      POSTGRES_PASSWORD: ${SNIPPETS_DB_PASSWORD}
-      POSTGRES_DB: ${SNIPPETS_DB_NAME}
-    ports:
-      - ${SNIPPETS_DB_PORT}
-    volumes:
-      - db-snippets-data:/var/lib/postgresql/data
+    networks:
+      - snippet-searcher
 
   db-permission:
     image: postgres:13
@@ -63,6 +85,35 @@ services:
     volumes:
       - db-permission-data:/var/lib/postgresql/data
 
+  asset-service:
+    container_name: "asset_service"
+    image: ghcr.io/austral-ingsis/snippet-asset-service:latest
+    ports:
+      - "8080:8080"
+    environment:
+      AZURE_HOST: "http://azurite"
+      NEW_RELIC_APP_NAME: "asset-service"
+      NEW_RELIC_AGENT_ENABLED: false
+    networks:
+      - snippet-searcher
+
+  azurite:
+    image: mcr.microsoft.com/azure-storage/azurite
+    container_name: "azurite"
+    hostname: azurite
+    restart: always
+    ports:
+      - "10000:10000"
+      - "10001:10001"
+      - "10002:10002"
+    volumes:
+      - blob:/workspace
+
 volumes:
   db-snippets-data:
   db-permission-data:
+  blob:
+    external: false
+
+networks:
+  snippet-searcher:
