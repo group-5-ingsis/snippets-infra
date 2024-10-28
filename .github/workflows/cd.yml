@@ -1,0 +1,26 @@
+name: CD
+
+on:
+  push:
+    branches: [ "main" ]
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  cd-production:
+    uses: group-5-ingsis/workflows/.github/workflows/deploy-infra.yml@main
+    secrets:
+      AZURE_KEY: ${{ secrets.AZURE_MAIN_KEY }}
+      AZURE_USER: ${{ secrets.AZURE_MAIN_USER }}
+      AZURE_HOST: ${{ secrets.AZURE_MAIN_HOST }}
+      COMPOSE: production
+
+  cd-development:
+    uses: group-5-ingsis/workflows/.github/workflows/deploy-infra.yml@main
+    secrets:
+      AZURE_KEY: ${{ secrets.AZURE_DEV_KEY }}
+      AZURE_USER: ${{ secrets.AZURE_DEV_USER }}
+      AZURE_HOST: ${{ secrets.AZURE_DEV_HOST }}
+      COMPOSE: development
