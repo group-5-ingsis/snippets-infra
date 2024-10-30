@@ -1,5 +1,5 @@
 services:
-  parse-app:
+  parse:
     image: ghcr.io/group-5-ingsis/parse:latest
     ports:
       - ${PARSE_APP_PORT}
