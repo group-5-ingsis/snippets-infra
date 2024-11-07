@@ -6,11 +6,8 @@ services:
     volumes:
       - ./certbot/www:/var/www/certbot
       - ./certbot/conf:/etc/letsencrypt
-    environment:
-      - SNIPPETS_PORT=${SNIPPETS_PORT}
-      - PARSE_PORT=${PARSE_PORT}
-      - PERMISSION_PORT=${PERMISSION_PORT}
-    entrypoint: /bin/sh -c "envsubst '\$SNIPPETS_PORT \$PARSE_PORT \$PERMISSION_PORT' < /etc/nginx/nginx.conf.template > /etc/nginx/nginx.conf && nginx -g 'daemon off;'"
+    entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done'"
+
 
   nginx:
     image: nginx:latest
@@ -19,12 +16,16 @@ services:
       - "80:80"
       - "443:443"
     volumes:
-      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx.conf.template:/etc/nginx/nginx.conf.template:ro
       - ./certbot/www:/var/www/certbot
       - ./certbot/conf:/etc/letsencrypt
+    environment:
+      - SNIPPETS_PORT=8082
+      - PARSE_PORT=8081
+      - PERMISSION_PORT=8083
+    entrypoint: /bin/sh -c "envsubst '\$SNIPPETS_PORT \$PARSE_PORT \$PERMISSION_PORT' < /etc/nginx/nginx.conf.template > /etc/nginx/nginx.conf && nginx -g 'daemon off;'"
     depends_on:
       - certbot
-
 
   parse:
     image: ghcr.io/group-5-ingsis/parse:latest-dev
