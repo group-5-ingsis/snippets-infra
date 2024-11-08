@@ -2,7 +2,7 @@ services:
 
   certbot:
     image: certbot/certbot
-    container_name: certbot
+    container_name: "certbot"
     volumes:
       - ./certbot/www:/var/www/certbot
       - ./certbot/conf:/etc/letsencrypt
@@ -11,7 +11,7 @@ services:
 
   nginx:
     image: nginx:latest
-    container_name: nginx
+    container_name: "nginx"
     ports:
       - "80:80"
       - "443:443"
@@ -29,6 +29,7 @@ services:
 
   parse:
     image: ghcr.io/group-5-ingsis/parse:latest-dev
+    container_name: "parse"
     ports:
       - ${PARSE_APP_PORT}
     environment:
@@ -36,6 +37,7 @@ services:
 
   snippets:
     image: ghcr.io/group-5-ingsis/snippets:latest-dev
+    container_name: "snippets"
     ports:
       - ${SNIPPETS_APP_PORT}
     environment:
@@ -52,7 +54,7 @@ services:
 
   db-snippets:
     image: postgres:13
-    container_name: db-snippets
+    container_name: "db-snippets"
     environment:
       POSTGRES_USER: ${SNIPPETS_DB_USER}
       POSTGRES_PASSWORD: ${SNIPPETS_DB_PASSWORD}
@@ -64,6 +66,7 @@ services:
 
   permission:
     image: ghcr.io/group-5-ingsis/permission:latest-dev
+    container_name: "permission"
     ports:
       - ${PERMISSION_APP_PORT}
     environment:
@@ -80,6 +83,7 @@ services:
 
   db-permission:
     image: postgres:13
+    container_name: "db-permission"
     environment:
       POSTGRES_USER: ${PERMISSION_DB_USER}
       POSTGRES_PASSWORD: ${PERMISSION_DB_PASSWORD}
