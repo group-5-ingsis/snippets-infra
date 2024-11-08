@@ -19,8 +19,10 @@ services:
       - ./nginx.conf.template:/etc/nginx/nginx.conf.template:ro
       - ./certbot/www:/var/www/certbot
       - ./certbot/conf:/etc/letsencrypt
-    env_file:
-      - ./env
+    environment:
+      - SNIPPETS_PORT=${SNIPPETS_SERVER_PORT}
+      - PARSE_PORT=${PARSE_SERVER_PORT}
+      - PERMISSION_PORT=${PERMISSION_SERVER_PORT}
     entrypoint: /bin/sh -c "envsubst '\$SNIPPETS_APP_PORT \$PARSE_APP_PORT \$PERMISSION_APP_PORT' < /etc/nginx/nginx.conf.template > /etc/nginx/nginx.conf && nginx -g 'daemon off;'"
     depends_on:
       - certbot
@@ -38,16 +40,25 @@ services:
     container_name: "snippets"
     ports:
       - ${SNIPPETS_APP_PORT}
-    env_file:
-      - ./env
+    environment:
+      SPRING_DATASOURCE_URL: ${SNIPPETS_DB_URL}
+      SPRING_DATASOURCE_USERNAME: ${SNIPPETS_DB_USER}
+      SPRING_DATASOURCE_PASSWORD: ${SNIPPETS_DB_PASSWORD}
+      SERVER_PORT: ${SNIPPETS_SERVER_PORT}
+      AUTH0_AUDIENCE: ${AUTH0_AUDIENCE}
+      AUTH_SERVER_URI: ${AUTH_SERVER_URI}
+      AUTH_CLIENT_ID: ${AUTH_CLIENT_ID}
+      AUTH_CLIENT_SECRET: ${AUTH_CLIENT_SECRET}
     depends_on:
       - db-snippets
 
   db-snippets:
     image: postgres:13
     container_name: "db-snippets"
-    env_file:
-      - ./env
+    environment:
+      POSTGRES_USER: ${SNIPPETS_DB_USER}
+      POSTGRES_PASSWORD: ${SNIPPETS_DB_PASSWORD}
+      POSTGRES_DB: ${SNIPPETS_DB_NAME}
     ports:
       - ${SNIPPETS_DB_PORT}
     volumes:
@@ -58,16 +69,25 @@ services:
     container_name: "permission"
     ports:
       - ${PERMISSION_APP_PORT}
-    env_file:
-      - ./env
+    environment:
+      SPRING_DATASOURCE_URL: ${PERMISSION_DB_URL}
+      SPRING_DATASOURCE_USERNAME: ${PERMISSION_DB_USER}
+      SPRING_DATASOURCE_PASSWORD: ${PERMISSION_DB_PASSWORD}
+      SERVER_PORT: ${PERMISSION_SERVER_PORT}
+      AUTH0_AUDIENCE: ${AUTH0_AUDIENCE}
+      AUTH_SERVER_URI: ${AUTH_SERVER_URI}
+      AUTH_CLIENT_ID: ${AUTH_CLIENT_ID}
+      AUTH_CLIENT_SECRET: ${AUTH_CLIENT_SECRET}
     depends_on:
       - db-permission
 
   db-permission:
     image: postgres:13
     container_name: "db-permission"
-    env_file:
-      - ./env
+    environment:
+      POSTGRES_USER: ${PERMISSION_DB_USER}
+      POSTGRES_PASSWORD: ${PERMISSION_DB_PASSWORD}
+      POSTGRES_DB: ${PERMISSION_DB_NAME}
     ports:
       - ${PERMISSION_DB_PORT}
     volumes:
