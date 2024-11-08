@@ -35,8 +35,6 @@ services:
     environment:
       SERVER_PORT: ${PARSE_SERVER_PORT}
       SPRING_PROFILES_ACTIVE: "dev"
-    env_file:
-      - ./.env
 
   snippets:
     image: ghcr.io/group-5-ingsis/snippets:latest-dev
@@ -53,8 +51,6 @@ services:
       AUTH_CLIENT_ID: ${AUTH_CLIENT_ID}
       AUTH_CLIENT_SECRET: ${AUTH_CLIENT_SECRET}
       SPRING_PROFILES_ACTIVE: "dev"
-    env_file:
-      - ./.env
     depends_on:
       - db-snippets
 
@@ -85,8 +81,6 @@ services:
       AUTH_CLIENT_ID: ${AUTH_CLIENT_ID}
       AUTH_CLIENT_SECRET: ${AUTH_CLIENT_SECRET}
       SPRING_PROFILES_ACTIVE: "dev"
-    env_file:
-      - ./.env
     depends_on:
       - db-permission
 
