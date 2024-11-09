@@ -34,7 +34,9 @@ services:
       - ${PARSE_APP_PORT}
     environment:
       SERVER_PORT: ${PARSE_SERVER_PORT}
-      SPRING_PROFILES_ACTIVE: "dev"
+      STREAM_KEY_FORMAT: ${STREAM_KEY_FORMAT}
+      STREAM_KEY_VALIDATE: ${STREAM_KEY_VALIDATE}
+      GROUP_ID: ${GROUP_ID}
 
   snippets:
     image: ghcr.io/group-5-ingsis/snippets:latest-dev
@@ -50,7 +52,8 @@ services:
       AUTH_SERVER_URI: ${AUTH_SERVER_URI}
       AUTH_CLIENT_ID: ${AUTH_CLIENT_ID}
       AUTH_CLIENT_SECRET: ${AUTH_CLIENT_SECRET}
-      SPRING_PROFILES_ACTIVE: "dev"
+      STREAM_KEY_FORMAT: ${STREAM_KEY_FORMAT}
+      GROUP_ID: ${GROUP_ID}
     depends_on:
       - db-snippets
 
@@ -80,7 +83,6 @@ services:
       AUTH_SERVER_URI: ${AUTH_SERVER_URI}
       AUTH_CLIENT_ID: ${AUTH_CLIENT_ID}
       AUTH_CLIENT_SECRET: ${AUTH_CLIENT_SECRET}
-      SPRING_PROFILES_ACTIVE: "dev"
     depends_on:
       - db-permission
 
