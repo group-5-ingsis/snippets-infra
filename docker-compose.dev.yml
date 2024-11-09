@@ -23,7 +23,7 @@ services:
         SNIPPETS_PORT: ${SNIPPETS_SERVER_PORT}
         PARSE_PORT: ${PARSE_SERVER_PORT}
         PERMISSION_PORT: ${PERMISSION_SERVER_PORT}
-    entrypoint: /bin/sh -c "envsubst '\$SNIPPETS_PORT \$PARSE_PORT \$PERMISSION_PORT' < /etc/nginx/nginx.conf.template > /etc/nginx/nginx.conf && nginx -g 'daemon off;'"
+    entrypoint: /bin/sh -c "echo \$SNIPPETS_PORT \$PARSE_PORT \$PERMISSION_PORT && envsubst '\$SNIPPETS_PORT \$PARSE_PORT \$PERMISSION_PORT' < /etc/nginx/nginx.conf.template > /etc/nginx/nginx.conf && nginx -g 'daemon off;'"
     depends_on:
       - certbot
 
