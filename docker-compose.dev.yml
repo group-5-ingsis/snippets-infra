@@ -33,6 +33,7 @@ services:
       STREAM_KEY_VALIDATE: ${STREAM_KEY_VALIDATE}
       GROUP_ID: ${GROUP_ID}
       ASSET_SERVICE_URL: ${ASSET_SERVICE_URL}
+      REDIS_HOST: ${REDIS_HOST}
 
   snippets:
     image: ghcr.io/group-5-ingsis/snippets:latest-dev
@@ -51,6 +52,7 @@ services:
       STREAM_KEY_FORMAT: ${STREAM_KEY_FORMAT}
       GROUP_ID: ${GROUP_ID}
       ASSET_SERVICE_URL: ${ASSET_SERVICE_URL}
+      REDIS_HOST: ${REDIS_HOST}
     depends_on:
       - db-snippets
 
@@ -81,6 +83,7 @@ services:
       AUTH_CLIENT_ID: ${AUTH_CLIENT_ID}
       AUTH_CLIENT_SECRET: ${AUTH_CLIENT_SECRET}
       ASSET_SERVICE_URL: ${ASSET_SERVICE_URL}
+      REDIS_HOST: ${REDIS_HOST}
     depends_on:
       - db-permission
 
