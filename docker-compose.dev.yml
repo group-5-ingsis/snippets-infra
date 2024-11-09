@@ -1,31 +1,31 @@
 services:
 
-  certbot:
-    image: certbot/certbot
-    container_name: "certbot"
-    volumes:
-      - ./certbot/www:/var/www/certbot
-      - ./certbot/conf:/etc/letsencrypt
-    entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done'"
-
-
-  nginx:
-    image: nginx:latest
-    container_name: "nginx"
-    ports:
-      - "80:80"
-      - "443:443"
-    volumes:
-      - ./nginx.conf.template:/etc/nginx/nginx.conf.template:ro
-      - ./certbot/www:/var/www/certbot
-      - ./certbot/conf:/etc/letsencrypt
-    environment:
-        SNIPPETS_PORT: ${SNIPPETS_SERVER_PORT}
-        PARSE_PORT: ${PARSE_SERVER_PORT}
-        PERMISSION_PORT: ${PERMISSION_SERVER_PORT}
-    entrypoint: /bin/sh -c "echo \$SNIPPETS_PORT \$PARSE_PORT \$PERMISSION_PORT && envsubst '\$SNIPPETS_PORT \$PARSE_PORT \$PERMISSION_PORT' < /etc/nginx/nginx.conf.template > /etc/nginx/nginx.conf && nginx -g 'daemon off;'"
-    depends_on:
-      - certbot
+#  certbot:
+#    image: certbot/certbot
+#    container_name: "certbot"
+#    volumes:
+#      - ./certbot/www:/var/www/certbot
+#      - ./certbot/conf:/etc/letsencrypt
+#    entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done'"
+#
+#
+#  nginx:
+#    image: nginx:latest
+#    container_name: "nginx"
+#    ports:
+#      - "80:80"
+#      - "443:443"
+#    volumes:
+#      - ./nginx.conf.template:/etc/nginx/nginx.conf.template:ro
+#      - ./certbot/www:/var/www/certbot
+#      - ./certbot/conf:/etc/letsencrypt
+#    environment:
+#        SNIPPETS_PORT: ${SNIPPETS_SERVER_PORT}
+#        PARSE_PORT: ${PARSE_SERVER_PORT}
+#        PERMISSION_PORT: ${PERMISSION_SERVER_PORT}
+#    entrypoint: /bin/sh -c "echo \$SNIPPETS_PORT \$PARSE_PORT \$PERMISSION_PORT && envsubst '\$SNIPPETS_PORT \$PARSE_PORT \$PERMISSION_PORT' < /etc/nginx/nginx.conf.template > /etc/nginx/nginx.conf && nginx -g 'daemon off;'"
+#    depends_on:
+#      - certbot
 
   parse:
     image: ghcr.io/group-5-ingsis/parse:latest-dev
