@@ -6,7 +6,9 @@ services:
     volumes:
       - ./certbot/www:/var/www/certbot
       - ./certbot/conf:/etc/letsencrypt
-    entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done'"
+    #entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done'"
+    command:
+      - certonly --webroot -w /var/www/certbot --force-renewal --email ${CERTBOT_EMAIL} --agree-tos -d ${CERTBOT_DOMAIN}
 
   nginx:
     image: nginx:latest
