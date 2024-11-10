@@ -130,7 +130,6 @@ services:
       VITE_AUTH0_DOMAIN: ${AUTH_SERVER_URI2}
       VITE_AUTH0_CLIENT_ID: ${AUTH_CLIENT_ID}
       VITE_AUTH0_AUDIENCE: ${AUTH0_AUDIENCE}
-    command: [ "npm", "run", "dev" ] # cambiar en prod a que buildee y ahi start
     ports:
       - "5173:5173"
 
