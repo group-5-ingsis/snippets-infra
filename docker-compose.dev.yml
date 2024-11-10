@@ -7,6 +7,7 @@ services:
     volumes:
       - ./certbot/conf:/etc/letsencrypt
       - ./certbot/www:/var/www/certbot
+    restart: unless-stopped
 
   nginx:
     image: nginx:latest
@@ -18,6 +19,7 @@ services:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
       - ./certbot/conf:/etc/letsencrypt
       - ./certbot/www:/var/www/certbot
+    restart: unless-stopped
 
   parse:
     image: ghcr.io/group-5-ingsis/parse:latest-dev
@@ -31,6 +33,7 @@ services:
       GROUP_ID: ${GROUP_ID}
       ASSET_SERVICE_URL: ${ASSET_SERVICE_URL}
       REDIS_HOST: ${REDIS_HOST}
+    restart: unless-stopped
 
   snippets:
     image: ghcr.io/group-5-ingsis/snippets:latest-dev
@@ -52,6 +55,7 @@ services:
       REDIS_HOST: ${REDIS_HOST}
     depends_on:
       - db-snippets
+    restart: unless-stopped
 
   db-snippets:
     image: postgres:13
@@ -64,6 +68,7 @@ services:
       - ${SNIPPETS_DB_PORT}
     volumes:
       - db-snippets-data:/var/lib/postgresql/data
+    restart: unless-stopped
 
   permission:
     image: ghcr.io/group-5-ingsis/permission:latest-dev
@@ -83,6 +88,7 @@ services:
       REDIS_HOST: ${REDIS_HOST}
     depends_on:
       - db-permission
+    restart: unless-stopped
 
   db-permission:
     image: postgres:13
@@ -95,6 +101,7 @@ services:
       - ${PERMISSION_DB_PORT}
     volumes:
       - db-permission-data:/var/lib/postgresql/data
+    restart: unless-stopped
 
   asset-service:
     container_name: "asset_service"
@@ -105,6 +112,7 @@ services:
       AZURE_HOST: "http://azurite"
       NEW_RELIC_APP_NAME: "asset-service"
       NEW_RELIC_AGENT_ENABLED: false
+    restart: unless-stopped
 
   azurite:
     image: mcr.microsoft.com/azure-storage/azurite
@@ -123,6 +131,7 @@ services:
     image: redis:6-alpine
     ports:
       - "6379:6379"
+    restart: unless-stopped
 
   printscript-ui:
     container_name: "printscript-ui"
@@ -133,7 +142,7 @@ services:
       VITE_AUTH0_AUDIENCE: ${AUTH0_AUDIENCE}
     ports:
       - "5173:5173"
-
+    restart: unless-stopped
 
   duckdns:
     image: linuxserver/duckdns
