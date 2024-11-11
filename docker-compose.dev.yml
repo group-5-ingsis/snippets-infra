@@ -142,7 +142,7 @@ services:
       VITE_AUTH0_CLIENT_ID: ${AUTH_CLIENT_ID}
       VITE_AUTH0_AUDIENCE: ${AUTH0_AUDIENCE}
     volumes:
-      - ui-build:/app/dist
+      - ./dist:/usr/share/nginx/html
     restart: unless-stopped
 
   duckdns:
@@ -156,5 +156,6 @@ services:
 volumes:
   db-snippets-data:
   db-permission-data:
+  printscript-ui:
   blob:
     external: false
