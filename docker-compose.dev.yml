@@ -142,7 +142,8 @@ services:
       VITE_AUTH0_AUDIENCE: ${AUTH0_AUDIENCE}
     restart: unless-stopped
     ports:
-      - "5173:5173"
+      - "80:80"
+      - "443:433"
 
   duckdns:
     image: linuxserver/duckdns
