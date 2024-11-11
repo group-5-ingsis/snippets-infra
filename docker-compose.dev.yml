@@ -136,11 +136,6 @@ services:
   printscript-ui:
     container_name: "printscript-ui"
     image: ghcr.io/group-5-ingsis/printscript-ui:latest-dev
-    environment:
-      VITE_AUTH0_DOMAIN: ${AUTH_SERVER_URI2}
-      VITE_AUTH0_CLIENT_ID: ${AUTH_CLIENT_ID}
-      VITE_AUTH0_AUDIENCE: ${AUTH0_AUDIENCE}
-      VITE_API_URL: ${API_URL}
     restart: unless-stopped
     ports:
       - "5173:80"
