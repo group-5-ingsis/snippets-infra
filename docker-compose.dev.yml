@@ -52,6 +52,7 @@ services:
       GROUP_ID: ${GROUP_ID}
       ASSET_SERVICE_URL: ${ASSET_SERVICE_URL}
       REDIS_HOST: ${REDIS_HOST}
+      NEW_RELIC_LICENSE_KEY: ${NEW_RELIC_LICENSE_KEY}
     depends_on:
       - db-snippets
     restart: unless-stopped
