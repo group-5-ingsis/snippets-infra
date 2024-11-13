@@ -26,6 +26,7 @@ services:
     ports:
       - ${PARSE_APP_PORT}
     environment:
+      NEW_RELIC_LICENSE_KEY: ${NEW_RELIC_LICENSE_KEY}
       SERVER_PORT: ${PARSE_SERVER_PORT}
       STREAM_KEY_FORMAT: ${STREAM_KEY_FORMAT}
       STREAM_KEY_VALIDATE: ${STREAM_KEY_VALIDATE}
@@ -154,3 +155,4 @@ volumes:
   db-permission-data:
   blob:
     external: false
+
