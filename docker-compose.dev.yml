@@ -40,6 +40,7 @@ services:
     ports:
       - ${SNIPPETS_APP_PORT}
     environment:
+      NEW_RELIC_LICENSE_KEY: ${NEW_RELIC_LICENSE_KEY}
       SPRING_DATASOURCE_URL: ${SNIPPETS_DB_URL}
       SPRING_DATASOURCE_USERNAME: ${SNIPPETS_DB_USER}
       SPRING_DATASOURCE_PASSWORD: ${SNIPPETS_DB_PASSWORD}
@@ -52,7 +53,6 @@ services:
       GROUP_ID: ${GROUP_ID}
       ASSET_SERVICE_URL: ${ASSET_SERVICE_URL}
       REDIS_HOST: ${REDIS_HOST}
-      NEW_RELIC_LICENSE_KEY: ${NEW_RELIC_LICENSE_KEY}
     depends_on:
       - db-snippets
     restart: unless-stopped
