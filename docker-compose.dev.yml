@@ -155,3 +155,4 @@ volumes:
   db-permission-data:
   blob:
     external: false
+
