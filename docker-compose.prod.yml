@@ -7,6 +7,8 @@ services:
     volumes:
       - ./certbot/conf:/etc/letsencrypt
       - ./certbot/www:/var/www/certbot
+    networks:
+      - app_network
 
   nginx:
     image: nginx:latest
@@ -19,6 +21,8 @@ services:
       - ./certbot/conf:/etc/letsencrypt
       - ./certbot/www:/var/www/certbot
     restart: unless-stopped
+    networks:
+      - app_network
 
   parse:
     image: ghcr.io/group-5-ingsis/parse:latest
@@ -34,6 +38,8 @@ services:
       ASSET_SERVICE_URL: ${ASSET_SERVICE_URL}
       REDIS_HOST: ${REDIS_HOST}
     restart: unless-stopped
+    networks:
+      - app_network
 
   snippets:
     image: ghcr.io/group-5-ingsis/snippets:latest
@@ -62,6 +68,8 @@ services:
     depends_on:
       - db-snippets
     restart: unless-stopped
+    networks:
+      - app_network
 
   db-snippets:
     image: postgres:13
@@ -75,6 +83,8 @@ services:
     volumes:
       - db-snippets-data:/var/lib/postgresql/data
     restart: unless-stopped
+    networks:
+      - app_network
 
   permission:
     image: ghcr.io/group-5-ingsis/permission:latest
@@ -96,6 +106,8 @@ services:
     depends_on:
       - db-permission
     restart: unless-stopped
+    networks:
+      - app_network
 
   db-permission:
     image: postgres:13
@@ -109,6 +121,8 @@ services:
     volumes:
       - db-permission-data:/var/lib/postgresql/data
     restart: unless-stopped
+    networks:
+      - app_network
 
   asset-service:
     container_name: "asset_service"
@@ -120,6 +134,8 @@ services:
       NEW_RELIC_APP_NAME: "asset-service"
       NEW_RELIC_AGENT_ENABLED: false
     restart: unless-stopped
+    networks:
+      - app_network
 
   azurite:
     image: mcr.microsoft.com/azure-storage/azurite
@@ -132,6 +148,8 @@ services:
       - "10002:10002"
     volumes:
       - blob:/workspace
+    networks:
+      - app_network
 
   redis:
     container_name: "event-bus"
@@ -139,6 +157,8 @@ services:
     ports:
       - "6379:6379"
     restart: unless-stopped
+    networks:
+      - app_network
 
   printscript-ui:
     container_name: "printscript-ui"
@@ -146,7 +166,8 @@ services:
     restart: unless-stopped
     ports:
       - "5173:80"
-
+    networks:
+      - app_network
 
   duckdns:
     image: linuxserver/duckdns
@@ -155,6 +176,8 @@ services:
       SUBDOMAINS: "snippetsearcher-group5"
       TOKEN: ${DUCK_TOKEN}
     restart: unless-stopped
+    networks:
+      - app_network
 
   test:
     image: ghcr.io/group-5-ingsis/test:latest
@@ -170,6 +193,8 @@ services:
       - ${TEST_APP_PORT}
     depends_on:
       - db-test
+    networks:
+      - app_network
 
   db-test:
     image: postgres:13
@@ -183,7 +208,8 @@ services:
     volumes:
       - db-test-data:/var/lib/postgresql/data
     restart: unless-stopped
-
+    networks:
+      - app_network
 
 volumes:
   db-snippets-data:
@@ -191,3 +217,7 @@ volumes:
   db-test-data:
   blob:
     external: false
+
+networks:
+  app_network:
+    driver: bridge
