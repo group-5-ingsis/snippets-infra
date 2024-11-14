@@ -32,7 +32,7 @@ services:
       STREAM_KEY_VALIDATE: ${STREAM_KEY_VALIDATE}
       GROUP_ID: ${GROUP_ID}
       ASSET_SERVICE_URL: ${ASSET_SERVICE_URL}
-      REDIS_HOST: ${REDIS_HOST}
+      REDIS_HOST: redis
     restart: unless-stopped
 
   snippets:
@@ -44,7 +44,7 @@ services:
       STREAM_KEY_TEST: ${STREAM_KEY_TEST}
       STREAM_KEY_TEST_CREATE: ${STREAM_KEY_TEST_CREATE}
       STREAM_KEY_TEST_RESULT: ${STREAM_KEY_TEST_RESULT}
-      GROUP_KEY_TEST_RESULT: ${GROUP_ID_TEST_RES}
+      GROUP_ID_TEST_RES: ${GROUP_ID_TEST_RES}
       PERMISSION_SERVICE_URL: ${PERMISSION_SERVICE_URL}
       NEW_RELIC_LICENSE_KEY: ${NEW_RELIC_LICENSE_KEY}
       SPRING_DATASOURCE_URL: ${SNIPPETS_DB_URL}
@@ -58,7 +58,7 @@ services:
       STREAM_KEY_FORMAT: ${STREAM_KEY_FORMAT}
       GROUP_ID: ${GROUP_ID}
       ASSET_SERVICE_URL: ${ASSET_SERVICE_URL}
-      REDIS_HOST: ${REDIS_HOST}
+      REDIS_HOST: redis
     depends_on:
       - db-snippets
     restart: unless-stopped
@@ -92,7 +92,7 @@ services:
       AUTH_CLIENT_ID: ${AUTH_CLIENT_ID}
       AUTH_CLIENT_SECRET: ${AUTH_CLIENT_SECRET}
       ASSET_SERVICE_URL: ${ASSET_SERVICE_URL}
-      REDIS_HOST: ${REDIS_HOST}
+      REDIS_HOST: redis
     depends_on:
       - db-permission
     restart: unless-stopped
@@ -139,6 +139,7 @@ services:
     ports:
       - "6379:6379"
     restart: unless-stopped
+    hostname: redis
 
   printscript-ui:
     container_name: "printscript-ui"
@@ -166,7 +167,7 @@ services:
       STREAM_KEY_TEST_RESULT: ${STREAM_KEY_TEST_RESULT}
       GROUP_KEY_TEST: ${GROUP_KEY_TEST}
       GROUP_KEY_TEST_CREATE: ${GROUP_KEY_TEST_CREATE}
-      REDIS_HOST: ${REDIS_HOST}
+      REDIS_HOST: redis
       SERVER_PORT: ${TEST_SERVER_PORT}
       SPRING_DATASOURCE_URL: ${TEST_DB_URL}
       SPRING_DATASOURCE_USERNAME: ${TEST_DB_USER}
