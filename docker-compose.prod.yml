@@ -179,6 +179,7 @@ services:
     networks:
       - app_network
 
+
   test:
     image: ghcr.io/group-5-ingsis/test:latest
     container_name: "test"
