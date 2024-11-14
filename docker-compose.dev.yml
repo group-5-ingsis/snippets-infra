@@ -143,6 +143,7 @@ services:
     ports:
       - "5173:80"
 
+
   duckdns:
     image: linuxserver/duckdns
     container_name: duckdns
