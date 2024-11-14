@@ -155,8 +155,38 @@ services:
       TOKEN: ${DUCK_TOKEN}
     restart: unless-stopped
 
+  test:
+    image: ghcr.io/group-5-ingsis/test:latest-dev
+    container_name: "test"
+    restart: unless-stopped
+    environment:
+      STREAM_KEY_TEST: ${STREAM_KEY_TEST}
+      STREAM_KEY_TEST_CREATE: ${STREAM_KEY_TEST_CREATE}
+      GROUP_KEY_TEST: ${GROUP_KEY_TEST}
+      GROUP_KEY_TEST_CREATE: ${GROUP_KEY_TEST_CREATE}
+      REDIS_HOST: ${REDIS_HOST}
+    ports:
+      - ${TEST_APP_PORT}
+    depends_on:
+      - db-test
+
+  db-test:
+    image: postgres:13
+    container_name: "db-test"
+    environment:
+      POSTGRES_USER: ${TEST_DB_USER}
+      POSTGRES_PASSWORD: ${TEST_DB_PASSWORD}
+      POSTGRES_DB: ${TEST_DB_NAME}
+    ports:
+      - ${TEST_DB_PORT}
+    volumes:
+      - db-test-data:/var/lib/postgresql/data
+    restart: unless-stopped
+
+
 volumes:
   db-snippets-data:
   db-permission-data:
+  db-test-data:
   blob:
     external: false
