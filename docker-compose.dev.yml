@@ -34,6 +34,8 @@ services:
       ASSET_SERVICE_URL: ${ASSET_SERVICE_URL}
       REDIS_HOST: redis
     restart: unless-stopped
+    depends_on:
+      - redis
 
   snippets:
     image: ghcr.io/group-5-ingsis/snippets:latest-dev
@@ -64,6 +66,7 @@ services:
       REDIS_HOST: redis
     depends_on:
       - db-snippets
+      - redis
     restart: unless-stopped
 
   db-snippets:
@@ -180,6 +183,7 @@ services:
       - ${TEST_APP_PORT}
     depends_on:
       - db-test
+      - redis
 
   db-test:
     image: postgres:13
