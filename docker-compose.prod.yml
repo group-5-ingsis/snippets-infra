@@ -218,6 +218,7 @@ services:
     networks:
       - app_network
 
+
 volumes:
   db-snippets-data:
   db-permission-data:
