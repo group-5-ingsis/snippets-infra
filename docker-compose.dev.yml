@@ -135,7 +135,7 @@ services:
       - "10001:10001"
       - "10002:10002"
     volumes:
-      - snippets-infra_blob:/workspace
+      - blob:/workspace
 
   redis:
     container_name: "event-bus"
