@@ -1,43 +1,79 @@
 services:
-  parse-app:
+
+  certbot:
+    image: certbot/certbot
+    container_name: certbot
+    command: certonly --webroot -w /var/www/certbot --force-renewal --email ${CERTBOT_EMAIL} -d ${CERTBOT_DOMAIN} --agree-tos
+    volumes:
+      - ./certbot/conf:/etc/letsencrypt
+      - ./certbot/www:/var/www/certbot
+    networks:
+      - app_network
+
+  nginx:
+    image: nginx:latest
+    container_name: "nginx"
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/prod.conf:/etc/nginx/nginx.conf:ro
+      - ./certbot/conf:/etc/letsencrypt
+      - ./certbot/www:/var/www/certbot
+    restart: unless-stopped
+    networks:
+      - app_network
+
+  parse:
     image: ghcr.io/group-5-ingsis/parse:latest
+    container_name: "parse"
     ports:
       - ${PARSE_APP_PORT}
     environment:
-      SPRING_PROFILES_ACTIVE: docker
+      NEW_RELIC_LICENSE_KEY: ${NEW_RELIC_LICENSE_KEY}
       SERVER_PORT: ${PARSE_SERVER_PORT}
+      STREAM_KEY_FORMAT: ${STREAM_KEY_FORMAT}
+      STREAM_KEY_VALIDATE: ${STREAM_KEY_VALIDATE}
+      GROUP_ID: ${GROUP_ID}
+      ASSET_SERVICE_URL: ${ASSET_SERVICE_URL}
+      REDIS_HOST: ${REDIS_HOST}
+    restart: unless-stopped
+    networks:
+      - app_network
 
-  snippets-app:
+  snippets:
     image: ghcr.io/group-5-ingsis/snippets:latest
+    container_name: "snippets"
     ports:
       - ${SNIPPETS_APP_PORT}
     environment:
+      STREAM_KEY_TEST: ${STREAM_KEY_TEST}
+      STREAM_KEY_TEST_CREATE: ${STREAM_KEY_TEST_CREATE}
+      GROUP_KEY_TEST: ${GROUP_KEY_TEST}
+      GROUP_KEY_TEST_CREATE: ${GROUP_KEY_TEST_CREATE}
+      PERMISSION_SERVICE_URL: ${PERMISSION_SERVICE_URL}
+      NEW_RELIC_LICENSE_KEY: ${NEW_RELIC_LICENSE_KEY}
       SPRING_DATASOURCE_URL: ${SNIPPETS_DB_URL}
       SPRING_DATASOURCE_USERNAME: ${SNIPPETS_DB_USER}
       SPRING_DATASOURCE_PASSWORD: ${SNIPPETS_DB_PASSWORD}
       SERVER_PORT: ${SNIPPETS_SERVER_PORT}
+      AUTH0_AUDIENCE: ${AUTH0_AUDIENCE}
+      AUTH_SERVER_URI: ${AUTH_SERVER_URI}
+      AUTH_CLIENT_ID: ${AUTH_CLIENT_ID}
+      AUTH_CLIENT_SECRET: ${AUTH_CLIENT_SECRET}
+      STREAM_KEY_FORMAT: ${STREAM_KEY_FORMAT}
+      GROUP_ID: ${GROUP_ID}
+      ASSET_SERVICE_URL: ${ASSET_SERVICE_URL}
+      REDIS_HOST: ${REDIS_HOST}
     depends_on:
       - db-snippets
-      - permission-app
-
-  permission-app:
-    image: ghcr.io/group-5-ingsis/permission:latest
-    ports:
-      - ${PERMISSION_APP_PORT}
-    environment:
-      SPRING_DATASOURCE_URL: ${PERMISSION_DB_URL}
-      SPRING_DATASOURCE_USERNAME: ${PERMISSION_DB_USER}
-      SPRING_DATASOURCE_PASSWORD: ${PERMISSION_DB_PASSWORD}
-      SERVER_PORT: ${PERMISSION_SERVER_PORT}
-      AUTH0_AUDIENCE: ${SNIPPETS_AUTH0_AUDIENCE}
-      AUTH_SERVER_URI: ${SNIPPETS_AUTH_SERVER_URI}
-      AUTH_CLIENT_ID: ${SNIPPETS_AUTH_CLIENT_ID}
-      AUTH_CLIENT_SECRET: ${SNIPPETS_AUTH_CLIENT_SECRET}
-    depends_on:
-      - db-permission
+    restart: unless-stopped
+    networks:
+      - app_network
 
   db-snippets:
     image: postgres:13
+    container_name: "db-snippets"
     environment:
       POSTGRES_USER: ${SNIPPETS_DB_USER}
       POSTGRES_PASSWORD: ${SNIPPETS_DB_PASSWORD}
@@ -46,23 +82,150 @@ services:
       - ${SNIPPETS_DB_PORT}
     volumes:
       - db-snippets-data:/var/lib/postgresql/data
+    restart: unless-stopped
+    networks:
+      - app_network
+
+  permission:
+    image: ghcr.io/group-5-ingsis/permission:latest
+    container_name: "permission"
+    ports:
+      - ${PERMISSION_APP_PORT}
+    environment:
+      NEW_RELIC_LICENSE_KEY: ${NEW_RELIC_LICENSE_KEY}
+      SPRING_DATASOURCE_URL: ${PERMISSION_DB_URL}
+      SPRING_DATASOURCE_USERNAME: ${PERMISSION_DB_USER}
+      SPRING_DATASOURCE_PASSWORD: ${PERMISSION_DB_PASSWORD}
+      SERVER_PORT: ${PERMISSION_SERVER_PORT}
+      AUTH0_AUDIENCE: ${AUTH0_AUDIENCE}
+      AUTH_SERVER_URI: ${AUTH_SERVER_URI}
+      AUTH_CLIENT_ID: ${AUTH_CLIENT_ID}
+      AUTH_CLIENT_SECRET: ${AUTH_CLIENT_SECRET}
+      ASSET_SERVICE_URL: ${ASSET_SERVICE_URL}
+      REDIS_HOST: ${REDIS_HOST}
+    depends_on:
+      - db-permission
+    restart: unless-stopped
+    networks:
+      - app_network
 
   db-permission:
     image: postgres:13
+    container_name: "db-permission"
     environment:
       POSTGRES_USER: ${PERMISSION_DB_USER}
       POSTGRES_PASSWORD: ${PERMISSION_DB_PASSWORD}
       POSTGRES_DB: ${PERMISSION_DB_NAME}
-      AUTH0_AUDIENCE: ${PERMISSION_AUTH0_AUDIENCE}
-      AUTH_SERVER_URI: ${PERMISSION_AUTH_SERVER_URI}
-      AUTH_CLIENT_ID: ${PERMISSION_AUTH_CLIENT_ID}
-      AUTH_CLIENT_SECRET: ${PERMISSION_AUTH_CLIENT_SECRET}
-      AUTH_CALLBACK: ${PERMISSION_AUTH_CALLBACK}
     ports:
       - ${PERMISSION_DB_PORT}
     volumes:
       - db-permission-data:/var/lib/postgresql/data
+    restart: unless-stopped
+    networks:
+      - app_network
+
+  asset-service:
+    container_name: "asset_service"
+    image: ghcr.io/austral-ingsis/snippet-asset-service:latest
+    ports:
+      - "8080:8080"
+    environment:
+      AZURE_HOST: "http://azurite"
+      NEW_RELIC_APP_NAME: "asset-service"
+      NEW_RELIC_AGENT_ENABLED: false
+    restart: unless-stopped
+    networks:
+      - app_network
+
+  azurite:
+    image: mcr.microsoft.com/azure-storage/azurite
+    container_name: "azurite"
+    hostname: azurite
+    restart: always
+    ports:
+      - "10000:10000"
+      - "10001:10001"
+      - "10002:10002"
+    volumes:
+      - blob:/workspace
+    networks:
+      - app_network
+
+  redis:
+    container_name: "event-bus"
+    image: redis:6-alpine
+    ports:
+      - "6379:6379"
+    restart: unless-stopped
+    networks:
+      - app_network
+
+  printscript-ui:
+    container_name: "printscript-ui"
+    image: ghcr.io/group-5-ingsis/printscript-ui:latest
+    restart: unless-stopped
+    ports:
+      - "5173:80"
+    networks:
+      - app_network
+
+  duckdns:
+    image: linuxserver/duckdns
+    container_name: duckdns
+    environment:
+      SUBDOMAINS: "snippetsearcher-group5"
+      TOKEN: ${DUCK_TOKEN}
+    restart: unless-stopped
+    networks:
+      - app_network
+
+
+  test:
+    image: ghcr.io/group-5-ingsis/test:latest
+    container_name: "test"
+    restart: unless-stopped
+    environment:
+      STREAM_KEY_TEST: ${STREAM_KEY_TEST}
+      STREAM_KEY_TEST_CREATE: ${STREAM_KEY_TEST_CREATE}
+      STREAM_KEY_TEST_RESULT: ${STREAM_KEY_TEST_RESULT}
+      GROUP_KEY_TEST: ${GROUP_KEY_TEST}
+      GROUP_KEY_TEST_CREATE: ${GROUP_KEY_TEST_CREATE}
+      REDIS_HOST: ${REDIS_HOST}
+      SERVER_PORT: ${TEST_SERVER_PORT}
+      SPRING_DATASOURCE_URL: ${TEST_DB_URL}
+      SPRING_DATASOURCE_USERNAME: ${TEST_DB_USER}
+      SPRING_DATASOURCE_PASSWORD: ${TEST_DB_PASSWORD}
+      ASSET_SERVICE_URL: ${ASSET_SERVICE_URL}
+    ports:
+      - ${TEST_APP_PORT}
+    depends_on:
+      - db-test
+    networks:
+      - app_network
+
+  db-test:
+    image: postgres:13
+    container_name: "db-test"
+    environment:
+      POSTGRES_USER: ${TEST_DB_USER}
+      POSTGRES_PASSWORD: ${TEST_DB_PASSWORD}
+      POSTGRES_DB: ${TEST_DB_NAME}
+    ports:
+      - ${TEST_DB_PORT}
+    volumes:
+      - db-test-data:/var/lib/postgresql/data
+    restart: unless-stopped
+    networks:
+      - app_network
+
 
 volumes:
   db-snippets-data:
   db-permission-data:
+  db-test-data:
+  blob:
+    external: false
+
+networks:
+  app_network:
+    driver: bridge
