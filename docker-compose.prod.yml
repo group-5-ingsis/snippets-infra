@@ -7,8 +7,6 @@ services:
     volumes:
       - ./certbot/conf:/etc/letsencrypt
       - ./certbot/www:/var/www/certbot
-    networks:
-      - app_network
 
   nginx:
     image: nginx:latest
@@ -21,8 +19,6 @@ services:
       - ./certbot/conf:/etc/letsencrypt
       - ./certbot/www:/var/www/certbot
     restart: unless-stopped
-    networks:
-      - app_network
 
   parse:
     image: ghcr.io/group-5-ingsis/parse:latest
@@ -36,10 +32,10 @@ services:
       STREAM_KEY_VALIDATE: ${STREAM_KEY_VALIDATE}
       GROUP_ID: ${GROUP_ID}
       ASSET_SERVICE_URL: ${ASSET_SERVICE_URL}
-      REDIS_HOST: ${REDIS_HOST}
+      REDIS_HOST: redis
     restart: unless-stopped
-    networks:
-      - app_network
+    depends_on:
+      - redis
 
   snippets:
     image: ghcr.io/group-5-ingsis/snippets:latest
@@ -47,10 +43,11 @@ services:
     ports:
       - ${SNIPPETS_APP_PORT}
     environment:
-      STREAM_KEY_TEST: ${STREAM_KEY_TEST}
-      STREAM_KEY_TEST_CREATE: ${STREAM_KEY_TEST_CREATE}
-      GROUP_KEY_TEST: ${GROUP_KEY_TEST}
-      GROUP_KEY_TEST_CREATE: ${GROUP_KEY_TEST_CREATE}
+      M_CLIENT_ID: ${M_CLIENT_ID}
+      M_CLIENT_SECRET: ${M_CLIENT_SECRET}
+      MANAGEMENT_API_IDENTIFIER: ${MANAGEMENT_API_IDENTIFIER}
+      STREAM_KEY_TEST_RESULT: ${STREAM_KEY_TEST_RESULT}
+      GROUP_ID_TEST_RES: ${GROUP_ID_TEST_RES}
       PERMISSION_SERVICE_URL: ${PERMISSION_SERVICE_URL}
       NEW_RELIC_LICENSE_KEY: ${NEW_RELIC_LICENSE_KEY}
       SPRING_DATASOURCE_URL: ${SNIPPETS_DB_URL}
@@ -64,12 +61,11 @@ services:
       STREAM_KEY_FORMAT: ${STREAM_KEY_FORMAT}
       GROUP_ID: ${GROUP_ID}
       ASSET_SERVICE_URL: ${ASSET_SERVICE_URL}
-      REDIS_HOST: ${REDIS_HOST}
+      REDIS_HOST: redis
     depends_on:
       - db-snippets
+      - redis
     restart: unless-stopped
-    networks:
-      - app_network
 
   db-snippets:
     image: postgres:13
@@ -83,8 +79,6 @@ services:
     volumes:
       - db-snippets-data:/var/lib/postgresql/data
     restart: unless-stopped
-    networks:
-      - app_network
 
   permission:
     image: ghcr.io/group-5-ingsis/permission:latest
@@ -102,12 +96,10 @@ services:
       AUTH_CLIENT_ID: ${AUTH_CLIENT_ID}
       AUTH_CLIENT_SECRET: ${AUTH_CLIENT_SECRET}
       ASSET_SERVICE_URL: ${ASSET_SERVICE_URL}
-      REDIS_HOST: ${REDIS_HOST}
+      REDIS_HOST: redis
     depends_on:
       - db-permission
     restart: unless-stopped
-    networks:
-      - app_network
 
   db-permission:
     image: postgres:13
@@ -121,8 +113,6 @@ services:
     volumes:
       - db-permission-data:/var/lib/postgresql/data
     restart: unless-stopped
-    networks:
-      - app_network
 
   asset-service:
     container_name: "asset_service"
@@ -134,22 +124,19 @@ services:
       NEW_RELIC_APP_NAME: "asset-service"
       NEW_RELIC_AGENT_ENABLED: false
     restart: unless-stopped
-    networks:
-      - app_network
 
   azurite:
     image: mcr.microsoft.com/azure-storage/azurite
     container_name: "azurite"
-    hostname: azurite
     restart: always
+    hostname: azurite
     ports:
       - "10000:10000"
       - "10001:10001"
       - "10002:10002"
     volumes:
       - blob:/workspace
-    networks:
-      - app_network
+    command: "azurite --blobHost 0.0.0.0 --queueHost 0.0.0.0 --tableHost 0.0.0.0 --location /workspace"
 
   redis:
     container_name: "event-bus"
@@ -157,8 +144,7 @@ services:
     ports:
       - "6379:6379"
     restart: unless-stopped
-    networks:
-      - app_network
+    hostname: redis
 
   printscript-ui:
     container_name: "printscript-ui"
@@ -166,8 +152,7 @@ services:
     restart: unless-stopped
     ports:
       - "5173:80"
-    networks:
-      - app_network
+
 
   duckdns:
     image: linuxserver/duckdns
@@ -176,21 +161,14 @@ services:
       SUBDOMAINS: "snippetsearcher-group5"
       TOKEN: ${DUCK_TOKEN}
     restart: unless-stopped
-    networks:
-      - app_network
-
 
   test:
     image: ghcr.io/group-5-ingsis/test:latest
     container_name: "test"
     restart: unless-stopped
     environment:
-      STREAM_KEY_TEST: ${STREAM_KEY_TEST}
-      STREAM_KEY_TEST_CREATE: ${STREAM_KEY_TEST_CREATE}
       STREAM_KEY_TEST_RESULT: ${STREAM_KEY_TEST_RESULT}
-      GROUP_KEY_TEST: ${GROUP_KEY_TEST}
-      GROUP_KEY_TEST_CREATE: ${GROUP_KEY_TEST_CREATE}
-      REDIS_HOST: ${REDIS_HOST}
+      REDIS_HOST: redis
       SERVER_PORT: ${TEST_SERVER_PORT}
       SPRING_DATASOURCE_URL: ${TEST_DB_URL}
       SPRING_DATASOURCE_USERNAME: ${TEST_DB_USER}
@@ -200,8 +178,7 @@ services:
       - ${TEST_APP_PORT}
     depends_on:
       - db-test
-    networks:
-      - app_network
+      - redis
 
   db-test:
     image: postgres:13
@@ -215,8 +192,6 @@ services:
     volumes:
       - db-test-data:/var/lib/postgresql/data
     restart: unless-stopped
-    networks:
-      - app_network
 
 
 volumes:
@@ -225,7 +200,3 @@ volumes:
   db-test-data:
   blob:
     external: false
-
-networks:
-  app_network:
-    driver: bridge
