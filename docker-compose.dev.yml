@@ -158,7 +158,7 @@ services:
     image: linuxserver/duckdns
     container_name: duckdns
     environment:
-      SUBDOMAINS: "snippetsearcher-group5"
+      SUBDOMAINS: "testing-ps-g5"
       TOKEN: ${DUCK_TOKEN}
     restart: unless-stopped
 
