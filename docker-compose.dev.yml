@@ -3,7 +3,7 @@ services:
   certbot:
     image: certbot/certbot
     container_name: certbot
-    command: certonly --webroot -w /var/www/certbot --force-renewal --email ${CERTBOT_EMAIL} -d https://testing-ps-g5.duckdns.org --agree-tos
+    command: certonly --webroot -w /var/www/certbot --force-renewal --email ${CERTBOT_EMAIL} -d testing-ps-g5.duckdns.org --agree-tos
     volumes:
       - ./certbot/conf:/etc/letsencrypt
       - ./certbot/www:/var/www/certbot
