@@ -67,7 +67,6 @@ services:
       - redis
     restart: unless-stopped
 
-
   db-snippets:
     image: postgres:13
     container_name: "db-snippets"
