@@ -67,6 +67,7 @@ services:
       - redis
     restart: unless-stopped
 
+
   db-snippets:
     image: postgres:13
     container_name: "db-snippets"
@@ -124,6 +125,7 @@ services:
       NEW_RELIC_APP_NAME: "asset-service"
       NEW_RELIC_AGENT_ENABLED: false
     restart: unless-stopped
+
 
   azurite:
     image: mcr.microsoft.com/azure-storage/azurite
