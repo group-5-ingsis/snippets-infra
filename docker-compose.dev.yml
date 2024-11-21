@@ -161,7 +161,7 @@ services:
       TOKEN: ${DUCK_TOKEN}
     restart: unless-stopped
 
-  test:
+  test: 
     image: ghcr.io/group-5-ingsis/test:latest-dev
     container_name: "test"
     restart: unless-stopped
