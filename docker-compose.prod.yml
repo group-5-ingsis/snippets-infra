@@ -125,6 +125,7 @@ services:
       NEW_RELIC_AGENT_ENABLED: false
     restart: unless-stopped
 
+
   azurite:
     image: mcr.microsoft.com/azure-storage/azurite
     container_name: "azurite"
